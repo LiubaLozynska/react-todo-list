@@ -26,6 +26,7 @@ code {
     monospace;
 }
 .main-wrap{
+position: relative;
 display: flex;
 min-width: 320px;
 flex-direction: column;
@@ -46,17 +47,23 @@ width: 45vw;
   border: 1px solid lightgrey;
   border-radius: 2px;
   color: lightgrey;
-  padding-left: 55px;
+  padding-left: 75px;
   font-size: 1.5rem;
   font-style: italic;
 }
-.main-wrap:before{
-  content: url('dropdown.png');
+.dropdown{
   position: absolute;
-  top:195px;
-  padding-left: 15px;
-  opacity: 0.5;
   visibility: hidden;
+  background: url('dropdown.png') center no-repeat;
+  background-size: contain;
+  opacity: 0.5;
+  top:18px;
+  left:25px;
+  width:40px;
+  height: 40px; 
+}
+.dropdown:hover{
+  opacity: 1;
 }
 .add-todo-field:focus{
   outline: none;

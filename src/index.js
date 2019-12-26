@@ -6,18 +6,20 @@ import * as serviceWorker from './serviceWorker';
 class Body extends React.Component{
     constructor (props) {
         super (props);
-        this.state = { inputValue: 'What needs to be done?', todos: [], showAllToDos: true, deleteCount: 0}
+        this.state = { inputValue: 'What needs to be done?', todos: [], showAllToDos: true, deleteCount: 0, dropdownclicked: 0}
     };
 
    
-    onChange = event => this.setState( {inputValue: event.target.value} );
+    onChange = (event) => this.setState( {inputValue: event.target.value} );
 
     getNewToDo = todo => this.setState( { todos: [...this.state.todos, todo] } );
-    displayNewToDo = (event) => {
+
+    displayNewToDo = event => {
         if (event.key === "Enter") {
             event.preventDefault();
             this.getNewToDo(this.state.inputValue);
             this.setState( {inputValue:''} );
+            document.getElementsByClassName('dropdown')[0].style.visibility="visible"
         } 
     }
     onInputFocus = () => {
@@ -27,7 +29,7 @@ class Body extends React.Component{
         this.setState( {inputValue:'What needs to be done?'} );
     }
 
-    checkboxOnClick = (event) => {
+    checkboxOnClick = event => {
 
         event.preventDefault();
 
@@ -55,31 +57,46 @@ class Body extends React.Component{
         
     }
 
-    buttonClick = (event) => {
+    buttonClick = event => {
         event.preventDefault(); 
         event.currentTarget.style.border = '1px solid rgb(233, 189, 189)';
         event.currentTarget.style.borderRadius = '2px';
 
         if (event.currentTarget.className === 'showAll') {
-            for (let i=0; i<document.getElementsByClassName('checked').length; i++) {  
-                document.getElementsByClassName('checked')[i].style.display='flex'
+            for (let i=0; i<document.getElementsByClassName('todo-wrap').length; i++) {  
+                document.getElementsByClassName('todo-wrap')[i].style.display='flex'
             }
         }
         else if (event.currentTarget.className === 'ActiveToDos') {
-            for (let i=0; i<document.getElementsByClassName('checked').length; i++) {  
-                document.getElementsByClassName('checked')[i].style.display='none'
+            for (let item of document.getElementsByClassName('todo-wrap')) {  
+                if ( item.classList.contains('checked')) {
+                    item.style.display="none";
+                }
+                else {
+                    item.style.display="flex";
+                }
             }
           
         }
+        else if (event.currentTarget.className === 'CompletedToDos') {
+            for (let item of document.getElementsByClassName('todo-wrap')) {    
+                if (!item.classList.contains('checked')) {
+                    item.style.display="none";
+                }
+                else {
+                    item.style.display="flex";
+                }
+            }
 
-    }
+        }
+  } 
 
-    buttonBlur = (event) => {
+    buttonBlur = event => {
         event.preventDefault(); 
         event.currentTarget.style.border = 'none'
     }
 
-    deleteToDo = (event) => {
+    deleteToDo = event => {
         event.preventDefault(); 
         event.currentTarget.parentElement.remove();
         if (!event.currentTarget.parentElement.classList.contains('checked')) {
@@ -89,12 +106,43 @@ class Body extends React.Component{
        
     }
 
-    deleteCompletedToDos = (event) => {
+    deleteCompletedToDos = event => {
         event.preventDefault(); 
         let i=0;
         while (document.getElementsByClassName('checked').length > 0) {  
             document.getElementsByClassName('checked')[i].remove();
         }
+    }
+
+    onDropDownClick = event => {
+        event.preventDefault(); 
+        
+        if (this.state.dropdownclicked === 0) {
+            let count=0;
+            for (let item of document.getElementsByClassName('todo-wrap')) {    
+                if (!item.classList.contains('checked')) {
+                    count++;
+                    item.classList.add('checked')
+                    item.children[1].style.color = "rgb(211, 211, 211)";
+                    item.children[1].style.textDecoration = "line-through";
+                    item.children[1].classList.add('checkedelem');
+                    this.setState( {dropdownclicked: 1} );
+                }
+            }
+            this.setState({deleteCount: this.state.deleteCount + count});
+        }
+        else {
+             let count=document.getElementsByClassName('checked') .length;
+             for (let item of document.getElementsByClassName('todo-wrap')) {
+                item.children[1].style.color='black';
+                item.children[1].style.textDecoration = "none";
+                item.children[1].classList.remove('checkedelem');
+                item.classList.remove('checked');
+             }
+             this.setState( {dropdownclicked: 0} );
+             this.setState({deleteCount: this.state.deleteCount - count});
+        }
+        
     }
     
 
@@ -105,7 +153,7 @@ class Body extends React.Component{
                <h1 className="main-heading">todos</h1>
 
                <form className="main-wrap">
-
+                   <span className="dropdown" onClick={this.onDropDownClick}></span>
                    <input 
                    className="add-todo-field" 
                    value = {this.state.inputValue} 
@@ -132,7 +180,7 @@ class Body extends React.Component{
                        <div className="todos-filters">
                             <button className="showAll" onClick={this.buttonClick} onBlur={this.buttonBlur}>All</button>
                             <button className="ActiveToDos" onClick={this.buttonClick} onBlur={this.buttonBlur}>Active</button>
-                            <button onClick={this.buttonClick} onBlur={this.buttonBlur}>Completed</button>
+                            <button className="CompletedToDos" onClick={this.buttonClick} onBlur={this.buttonBlur}>Completed</button>
                        </div>
                        <div className="todos-completed">
                             <button onClick={this.deleteCompletedToDos}>Clear Completed</button> 
